@@ -1,0 +1,138 @@
+
+
+
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import { FaUserGraduate, FaEnvelope, FaLock } from "react-icons/fa";
+
+const PORT = import.meta.env.VITE_PORT || "http://localhost:3000";
+const API = `${PORT}/api/auth/login`;
+
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post(API, { email, password });
+      const data = res.data;
+      console.log(res.data)
+
+      setMessage("Login successful ✅");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("user", JSON.stringify({ email }))
+
+      if (data.role === "student") {
+        navigate("/studentpage", { replace: true });
+      } else {
+        navigate("/login", { replace: true });
+      }
+      window.location.reload();
+
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Login failed ❌");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-white to-purple-200 flex items-center justify-center px-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 sm:p-8">
+
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="bg-purple-100 p-4 rounded-full inline-block mb-3">
+            <FaUserGraduate className="text-3xl text-purple-600" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-purple-700">
+            Student Login
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Access your attendance dashboard
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+            <FaEnvelope className="text-gray-400 mr-2" />
+            <input
+              type="email"
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-transparent outline-none w-full text-sm"
+              required
+            />
+          </div>
+
+          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+            <FaLock className="text-gray-400 mr-2" />
+            <input
+              type="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="bg-transparent outline-none w-full text-sm"
+              required
+            />
+          </div>
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-full shadow-md hover:shadow-lg transition"
+          >
+            Login
+          </button>
+
+          {/* Register Link */}
+          <p className="text-center text-sm text-gray-500">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-purple-600 hover:underline font-semibold"
+            >
+              Register
+            </Link>
+          </p>
+
+          {/* Home Button */}
+          <div className="flex justify-center">
+            <Link to="/">
+              <button
+                type="button"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-6 py-2 rounded-full text-sm transition"
+              >
+                ⬅ Home
+              </button>
+            </Link>
+          </div>
+        </form>
+
+        {/* Message */}
+        {message && (
+          <p className={`mt-4 text-center text-sm font-medium ${
+            message.includes("✅") ? "text-green-500" : "text-red-500"
+          }`}>
+            {message}
+          </p>
+        )}
+
+        {/* Footer */}
+        <p className="text-center text-xs text-gray-400 mt-6">
+          © 2026 Face Attendance System
+        </p>
+
+      </div>
+    </div>
+  );
+}
+
+export default Login;

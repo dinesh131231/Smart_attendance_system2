@@ -7,7 +7,8 @@ const attendanceSchema = new mongoose.Schema(
       ref: "Student",
       required: true
     },
-
+    name: { type: String },   // "Dinesh sutar"
+    rollNumber: { type: String },
     date: {
       type: String,
       required: true

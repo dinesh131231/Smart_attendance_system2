@@ -9,6 +9,8 @@ import faceRoutes from "./routes/faceRoute.js";
 import ipRoutes from "./routes/ipRoutes.js"
 
 import { connectDB } from "./config/db.js";
+import { defultAdmin, createDefaultStudent } from "./controllers/authController.js";
+import { initSocketServer } from "./utils/socket.js";
 // import { loadModels } from "./utils/faceModels.js";
 
 dotenv.config();
@@ -20,6 +22,7 @@ const PORT = process.env.PORT || 3000;
 // middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use("/api/auth", authRoutes);
@@ -38,15 +41,25 @@ app.get("/login", (req, res) => {
   res.send("this is login");
 });
 
-// connect database
-connectDB();
+// connect database and initialize the default admin account
+const startServer = async () => {
+  try {
+    await connectDB();
+    await defultAdmin();
+    await createDefaultStudent();
 
-// start server
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    const server = app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
 
-// error handler
-server.on("error", (err) => {
-  console.error("Server failed to start:", err.message);
-});
+    initSocketServer(server);
+
+    server.on("error", (err) => {
+      console.error("Server failed to start:", err.message);
+    });
+  } catch (error) {
+    console.error("Startup failed:", error.message);
+  }
+};
+
+startServer();

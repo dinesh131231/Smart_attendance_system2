@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
-import { FaUserShield, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaUserShield, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PORT = import.meta.env.VITE_PORT || "http://localhost:3000";
 const API = `${PORT}/api/auth/login`;
@@ -9,8 +11,8 @@ const API = `${PORT}/api/auth/login`;
 function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [message, setMessage] = useState("")
 
   // ✅ In login page — store user info
   const handleLogin = async (e) => {
@@ -20,7 +22,7 @@ function AdminLoginPage() {
       const data = res.data;
       console.log(res.data)
 
-      setMessage("Login successful ✅");
+      toast.success("Login successful", { autoClose: 3000 });
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("user", JSON.stringify({ email })); // ✅ store email
@@ -33,8 +35,7 @@ function AdminLoginPage() {
       }
       window.location.reload();
     } catch (err) {
-      setMessage(err.response?.data?.message || "Login failed ❌");
-      console.log(message);
+      toast.error(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -72,13 +73,21 @@ function AdminLoginPage() {
           <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
             <FaLock className="text-gray-400 mr-2" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="bg-transparent outline-none w-full text-sm"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="ml-2 text-gray-500"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
 
 
@@ -109,6 +118,8 @@ function AdminLoginPage() {
             </Link>
           </div>
         </form>
+
+        <ToastContainer position="top-right" autoClose={3000} />
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-6">

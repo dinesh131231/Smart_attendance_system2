@@ -1,49 +1,3 @@
-// import Student from "../models/Student.js";
-
-
-
-// export const addStudent = async (req, res) => {
-//   try {
-//     const { name, rollNumber, email, Student_id, course, faceDescriptors } = req.body;
-
-
-//     // Validate fields
-//     if (!name || !rollNumber || !email || !Student_id || !course || !faceDescriptors) {
-//       return res.status(400).json({ success: false, message: "All fields are required" });
-//     }
-
-//     // Ensure faceDescriptor is a normal array
-//     const descriptorArray = Array.isArray(faceDescriptors)
-//       ? faceDescriptors
-//       : Array.from(faceDescriptors);
-
-//     // Check if student exists
-//     let student = await Student.findOne({ rollNumber });
-
-//     if (student) {
-//       // Add new descriptor
-//       student.faceDescriptors.push(descriptorArray);
-//     } else {
-//       // Create new student
-//       student = new Student({
-//         name,
-//         rollNumber,
-//         email,
-//         Student_id,
-//         course,
-//         faceDescriptors: [descriptorArray],
-//       });
-//     }
-
-//     await student.save();
-
-//     res.json({success: true, message: "Student saved" });
-//   } catch (err) {
-//     console.error(err); // log the real error
-//     res.status(500).json({ message: "Internal Server Error", error: err.message });
-//   }
-// };
-
 import Student from "../models/Student.js";
 import Attendance from "../models/Attendance.js";
 import Class from "../models/Class.js";
@@ -103,51 +57,6 @@ export const getStudents = async (req, res) => {
   }
 };
 
-// ─── Get Single Student by ID ────────────────────────────────────────────────
-
-// export const getStudentById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-
-//     // ✅ Guard against invalid ObjectId (e.g., "email" string)
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//       return res.status(400).json({ success: false, message: "Invalid student ID" });
-//     }
-
-//     const student = await Student.findById(id).select("-faceDescriptors");
-
-//     // ✅ Check student existence BEFORE running expensive queries
-//     if (!student) {
-//       return res.status(404).json({ success: false, message: "Student not found" });
-//     }
-
-//     // ✅ Run all queries in parallel for better performance
-//     const [totalClasses, attendanceRecords] = await Promise.all([
-//       Class.countDocuments(),
-//       Attendance.find({ studentId: id }).sort({ createdAt: -1 }),
-//     ]);
-
-//     const presentCount = attendanceRecords.length;
-//     const absentCount = totalClasses - presentCount;
-//     const percentage = totalClasses > 0
-//       ? Math.round((presentCount / totalClasses) * 100)
-//       : 0;
-
-//     res.status(200).json({
-//       success: true,
-//       student,
-//       attendanceRecords,
-//       totalClasses,
-//       presentCount,
-//       absentCount,
-//       percentage,
-//     });
-
-//   } catch (error) {
-//     console.error("getStudentById error:", error.message);
-//     res.status(500).json({ success: false, error: error.message });
-//   }
-// };
 
 export const getStudentById = async (req, res) => {
   try {

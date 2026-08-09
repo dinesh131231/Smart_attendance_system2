@@ -6,6 +6,8 @@ import {
 import * as faceapi from "@vladmandic/face-api";
 import Webcam from "react-webcam";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import axios from "axios"
 
 const PORT = import.meta.env.VITE_PORT || "http://localhost:3000";
@@ -219,63 +221,88 @@ export default function AdminDashboard() {
 
     /* popups */
     const [livePopup, setLivePopup] = useState(null);
-    const [attendancePopup, setAttendancePopup] = useState(null);
     const prevRegisteredCount = useRef(0);
 
-    /* SSE */
-    const [sseConnected, setSseConnected] = useState(false);
-    const sseRef = useRef(null);
+    /* live notifications */
+    const [liveNotificationsEnabled, setLiveNotificationsEnabled] = useState(true);
+    const [socketConnected, setSocketConnected] = useState(false);
+    const socketRef = useRef(null);
 
     /* row highlights */
     const [highlightedRolls, setHighlightedRolls] = useState(new Set());
     const navigate = useNavigate();
 
     /* ────────────────────────────────────────
-       SSE
+       WebSocket live notifications
     ──────────────────────────────────────── */
-    // useEffect(() => {
-    //     let es;
-    //     const connect = () => {
-    //         es = new EventSource(`${PORT}/api/attendance/stream`);
-    //         sseRef.current = es;
+    useEffect(() => {
+        if (!liveNotificationsEnabled) {
+            setSocketConnected(false);
+            socketRef.current?.close();
+            socketRef.current = null;
+            return;
+        }
 
-    //         es.onopen = () => setSseConnected(true);
+        const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+        const wsUrl = `${wsProtocol}://${window.location.hostname}:3000`;
+        const socket = new WebSocket(wsUrl);
+        socketRef.current = socket;
 
-    //         es.addEventListener("attendance", (e) => {
-    //             try {
-    //                 const record = JSON.parse(e.data);
-    //                 setAttendancePopup(record);
-    //                 const roll = record.rollNumber;
-    //                 if (roll) {
-    //                     setHighlightedRolls(prev => new Set([...prev, roll]));
-    //                     setTimeout(() => {
-    //                         setHighlightedRolls(prev => {
-    //                             const next = new Set(prev);
-    //                             next.delete(roll);
-    //                             return next;
-    //                         });
-    //                     }, 4000);
-    //                 }
-    //                 setAttendance(prev => {
-    //                     const dup = prev.some(a =>
-    //                         (a._id && a._id === record._id) ||
-    //                         (a.rollNumber === record.rollNumber && a.date === record.date)
-    //                     );
-    //                     return dup ? prev : [record, ...prev];
-    //                 });
-    //             } catch (_) {}
-    //         });
+        socket.onopen = () => {
+            setSocketConnected(true);
+        };
 
-    //         es.onerror = () => {
-    //             setSseConnected(false);
-    //             es.close();
-    //             setTimeout(connect, 5000);
-    //         };
-    //     };
+        socket.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                if (message.type !== "attendance-marked") return;
 
-    //     connect();
-    //     return () => { sseRef.current?.close(); };
-    // }, []);
+                const record = message.payload;
+                const toastMessage = `${record.name || "Student"} (${record.rollNumber || "—"}) marked attendance`;
+                toast.success(toastMessage, {
+                    position: "top-right",
+                    autoClose: 4000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+
+                const roll = record.rollNumber;
+                if (roll) {
+                    setHighlightedRolls(prev => new Set([...prev, roll]));
+                    setTimeout(() => {
+                        setHighlightedRolls(prev => {
+                            const next = new Set(prev);
+                            next.delete(roll);
+                            return next;
+                        });
+                    }, 4000);
+                }
+
+                setAttendance(prev => {
+                    const duplicate = prev.some(a =>
+                        (a._id && a._id === record._id) ||
+                        (a.rollNumber === record.rollNumber && a.date === record.date)
+                    );
+                    return duplicate ? prev : [record, ...prev];
+                });
+            } catch (_) { }
+        };
+
+        socket.onerror = () => {
+            setSocketConnected(false);
+        };
+
+        socket.onclose = () => {
+            setSocketConnected(false);
+        };
+
+        return () => {
+            socket.close();
+            socketRef.current = null;
+        };
+    }, [liveNotificationsEnabled]);
 
     /* ────────────────────────────────────────
        face-api models
@@ -462,7 +489,7 @@ export default function AdminDashboard() {
         fetchIpList();
     }, [fetchIpList]);
 
-    
+
     useEffect(() => {
         console.log('ipList state updated:', ipList); // ✅ confirms state is set
     }, [ipList]);
@@ -655,10 +682,16 @@ export default function AdminDashboard() {
         <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-violet-100">
             <GlobalStyles />
 
-            {/* Attendance popup (SSE) */}
-            {attendancePopup && (
-                <AttendancePopup record={attendancePopup} onClose={() => setAttendancePopup(null)} />
-            )}
+            <ToastContainer
+                position="top-right"
+                autoClose={4000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
 
             {/* Registration popup */}
             {livePopup && (
@@ -672,6 +705,19 @@ export default function AdminDashboard() {
                     {/* <SseBadge className="" connected={sseConnected} /> */}
                 </div>
                 <div className="flex gap-1.5 flex-wrap items-center">
+                    <label className="flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm font-semibold text-violet-700">
+                        <span>Live</span>
+                        <input
+                            type="checkbox"
+                            checked={liveNotificationsEnabled}
+                            onChange={() => setLiveNotificationsEnabled(prev => !prev)}
+                            className="h-4 w-4 rounded border-violet-300 text-violet-600 focus:ring-violet-500"
+                        />
+                    </label>
+                    <div className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${socketConnected ? "border-green-200 bg-green-50 text-green-600" : "border-red-200 bg-red-50 text-red-600"}`}>
+                        <FaWifi className="text-[10px]" />
+                        {socketConnected ? "Live Connected" : "Offline"}
+                    </div>
                     {["dashboard", "individual", "bydate", "registered", "ip"].map(tab => (
                         <button key={tab} className={tabClass(tab)} onClick={() => setActiveTab(tab)}>
                             {tab === "dashboard" ? "Dashboard"

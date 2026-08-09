@@ -1,10 +1,9 @@
-
-
-
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { FaUserGraduate, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaUserGraduate, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PORT = import.meta.env.VITE_PORT || "http://localhost:3000";
 const API = `${PORT}/api/auth/login`;
@@ -12,7 +11,7 @@ const API = `${PORT}/api/auth/login`;
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -24,7 +23,7 @@ function Login() {
       const data = res.data;
       console.log(res.data)
 
-      setMessage("Login successful ✅");
+      toast.success("Login successful", { autoClose: 3000 });
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("user", JSON.stringify({ email }))
@@ -37,7 +36,7 @@ function Login() {
       window.location.reload();
 
     } catch (err) {
-      setMessage(err.response?.data?.message || "Login failed ❌");
+      toast.error(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -75,13 +74,21 @@ function Login() {
           <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
             <FaLock className="text-gray-400 mr-2" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="bg-transparent outline-none w-full text-sm"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="ml-2 text-gray-500"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
 
           {/* Login Button */}
@@ -116,14 +123,7 @@ function Login() {
           </div>
         </form>
 
-        {/* Message */}
-        {message && (
-          <p className={`mt-4 text-center text-sm font-medium ${
-            message.includes("✅") ? "text-green-500" : "text-red-500"
-          }`}>
-            {message}
-          </p>
-        )}
+        <ToastContainer position="top-right" autoClose={3000} />
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-6">

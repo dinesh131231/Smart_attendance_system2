@@ -1,30 +1,3 @@
-// import express from "express";
-// import {
-//   addStudent,
-//   getStudents,
-  
-//   deleteStudent
-// } from "../controllers/studentController.js";
-// import allowRoles from "../middleware/roleMiddleware.js";
-// import authMiddleware from "../middleware/authmiddleware.js";
-
-// const router = express.Router();
-
-// // add student
-// router.post("/",addStudent);
-
-// // get all students
-// // router.get("/",authMiddleware,allowRoles("admin") ,getStudents);
-
-// // delete student
-// // router.delete("/:id", authMiddleware,allowRoles("admin"),deleteStudent);
-
-// // delete all students
-
-
-// export default router;
-
-
 import express from "express";
 import {
   addStudent,

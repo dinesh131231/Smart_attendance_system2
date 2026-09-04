@@ -639,18 +639,7 @@ export default function AdminDashboard() {
         }
     };
 
-    // const addIp = async () => {
-    //     const v = ipInput.trim();
-    //     if (!v || ipList.includes(v)) { setIpInput(""); return; }
-    //     setIpLoading(true);
-    //     try { await fetch(`${PORT}/api/ip/settings/allowed-ip`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ip: v }) }); } catch (_) { }
-    //     setIpList(p => [...p, v]); setIpInput(""); setIpLoading(false);
-    // };
-    // const removeIp = async (ip) => {
-    //     try { await fetch(`${PORT}/api/ip-list/${encodeURIComponent(ip)}`, { method: "DELETE" }); } catch (_) { }
-    //     setIpList(p => p.filter(i => i !== ip));
-    // };
-
+    
     /* ────────────────────────────────────────
        Signout
     ──────────────────────────────────────── */
@@ -872,25 +861,7 @@ export default function AdminDashboard() {
                     <div className="max-w-[720px] mx-auto bg-white rounded-[20px] shadow-[0_4px_20px_rgba(124,58,237,0.1)] p-6">
                         <h2 className="text-base font-bold text-gray-700 mt-0">Individual Student Attendance</h2>
 
-                        {/* Search b
-        <form onSubmit={e => { e.preventDefault(); searchName && fetchIndividual(searchName); }}>
-  <div className="flex gap-2 mb-4">
-    <input
-      type="text"
-      placeholder="Enter roll number…"
-      value={searchName}
-      onChange={e => setSearchName(e.target.value)}
-      className="flex-1 px-[18px] py-2.5 bg-gray-100 border-none rounded-full outline-none text-sm box-border"
-    />
-    <button
-      type="submit"
-      disabled={indLoading || !searchName}
-      className="bg-violet-600 text-white border-none px-6 py-2.5 rounded-full font-semibold text-sm cursor-pointer disabled:bg-violet-300 disabled:cursor-not-allowed transition-colors"
-    >
-      {indLoading ? "Searching…" : "Search"}
-    </button>
-  </div>
-</form> */}
+                       
 
                         <div className="flex gap-2 mb-4">
                             <input
@@ -945,90 +916,7 @@ export default function AdminDashboard() {
                 )}
 
 
-                {/* {activeTab === "individual" && (
-    <div className="max-w-[720px] mx-auto bg-white rounded-[20px] shadow-[0_4px_20px_rgba(124,58,237,0.1)] p-6">
-        <h2 className="text-base font-bold text-gray-700 mt-0">Individual Student Attendance</h2>
-        <input
-            type="text" placeholder="Enter roll number…" value={searchName}
-            onChange={e => {
-                setSearchName(e.target.value);
-                fetchIndividual(e.target.value);
-            }}
-            className="w-full px-[18px] py-2.5 bg-gray-100 border-none rounded-full outline-none mb-4 text-sm box-border"
-        />
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
-                <thead>
-                    <tr className="border-b-2 border-gray-100">
-                        {["#","Name","Roll No","Date","Status"].map(h => (
-                            <th key={h} className="text-left px-3 py-2 text-gray-400">{h}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {indLoading
-                        ? <tr><td colSpan={5} className="text-center py-10 text-gray-300">Loading…</td></tr>
-                        : individualData.length > 0 ? individualData.map((a, i) => (
-                            <tr key={i} className="border-b border-gray-50">
-                                <td className="px-3 py-2.5 text-gray-300">{i + 1}</td>
-                                <td className="px-3 py-2.5 font-semibold">{a.name || a.studentName}</td>
-                                <td className="px-3 py-2.5 font-mono text-gray-500">{a.rollNumber || "—"}</td>
-                                <td className="px-3 py-2.5 text-gray-500">{a.date ? a.date.split("T")[0] : "—"}</td>
-                                <td className="px-3 py-2.5">
-                                    <span className={`${sBg(a.status)} ${sColor(a.status)} px-3 py-0.5 rounded-full text-xs font-bold`}>{a.status}</span>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr><td colSpan={5} className="text-center py-10 text-gray-300">
-                                {searchName ? "No records found" : "Enter a roll number to search"}
-                            </td></tr>
-                        )
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-)} */}
-                {/* {activeTab === "individual" && (
-                    <div className="max-w-[720px] mx-auto bg-white rounded-[20px] shadow-[0_4px_20px_rgba(124,58,237,0.1)] p-6">
-                        <h2 className="text-base font-bold text-gray-700 mt-0">Individual Student Attendance</h2>
-                        <input
-                            type="text" placeholder="Search student by name…" value={searchName}
-                            onChange={e => setSearchName(e.target.value)}
-                            className="w-full px-[18px] py-2.5 bg-gray-100 border-none rounded-full outline-none mb-4 text-sm box-border"
-                        />
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr className="border-b-2 border-gray-100">
-                                        {["#","Name","Roll No","Date","Status"].map(h => (
-                                            <th key={h} className="text-left px-3 py-2 text-gray-400">{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {indLoading
-                                        ? <tr><td colSpan={5} className="text-center py-10 text-gray-300">Loading…</td></tr>
-                                        : individualData.length > 0 ? individualData.map((a, i) => (
-                                            <tr key={i} className="border-b border-gray-50">
-                                                <td className="px-3 py-2.5 text-gray-300">{i + 1}</td>
-                                                <td className="px-3 py-2.5 font-semibold">{a.name || a.studentName}</td>
-                                                <td className="px-3 py-2.5 font-mono text-gray-500">{a.rollNumber || "—"}</td>
-                                                <td className="px-3 py-2.5 text-gray-500">{a.date ? a.date.split("T")[0] : "—"}</td>
-                                                <td className="px-3 py-2.5">
-                                                    <span className={`${sBg(a.status)} ${sColor(a.status)} px-3 py-0.5 rounded-full text-xs font-bold`}>{a.status}</span>
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr><td colSpan={5} className="text-center py-10 text-gray-300">{searchName ? "No records found" : "Type a name to search"}</td></tr>
-                                        )
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )} */}
-
+            
                 {/* ══ BY DATE TAB ══ */}
                 {activeTab === "bydate" && (
                     <div className="max-w-[720px] mx-auto bg-white rounded-[20px] shadow-[0_4px_20px_rgba(124,58,237,0.1)] p-6">

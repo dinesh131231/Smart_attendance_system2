@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/authRoute.js";
 import studentRoutes from "./routes/studentsRoute.js";
-import attendanceRouter from "./routes/attendanceRoute.js";;
+import attendanceRouter from "./routes/attendanceRoute.js";
 import faceRoutes from "./routes/faceRoute.js";
-import ipRoutes from "./routes/ipRoutes.js"
+import ipRoutes from "./routes/ipRoutes.js";
 
 import { connectDB } from "./config/db.js";
 import { defultAdmin, createDefaultStudent } from "./controllers/authController.js";
@@ -19,9 +19,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // await loadModels();
 
+// allowed origins from .env (comma-separated), e.g.
+// CLIENT_URL=http://localhost:5173,https://your-frontend-domain.com
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(",").map((url) => url.trim())
+  : [];
 
 // middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS: " + origin));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -53,7 +70,7 @@ const startServer = async () => {
       console.log(`Server is running on port ${PORT}`);
     });
 
-    initSocketServer(server);
+    initSocketServer(server, allowedOrigins);
 
     server.on("error", (err) => {
       console.error("Server failed to start:", err.message);
